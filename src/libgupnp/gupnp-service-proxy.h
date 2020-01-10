@@ -30,6 +30,9 @@ G_BEGIN_DECLS
 GType
 gupnp_service_proxy_get_type (void) G_GNUC_CONST;
 
+GType
+gupnp_service_proxy_action_get_type (void) G_GNUC_CONST;
+
 #define GUPNP_TYPE_SERVICE_PROXY \
                 (gupnp_service_proxy_get_type ())
 #define GUPNP_SERVICE_PROXY(obj) \
@@ -130,14 +133,15 @@ gupnp_service_proxy_send_action_valist
                                     GError                        **error,
                                     va_list                         var_args);
 
+#ifndef GUPNP_DISABLE_DEPRECATED
 gboolean
 gupnp_service_proxy_send_action_hash
                                    (GUPnPServiceProxy              *proxy,
                                     const char                     *action,
                                     GError                        **error,
                                     GHashTable                     *in_hash,
-                                    GHashTable                     *out_hash);
-
+                                    GHashTable                     *out_hash) G_GNUC_DEPRECATED;
+#endif
 
 gboolean
 gupnp_service_proxy_send_action_list (GUPnPServiceProxy *proxy,
@@ -149,7 +153,15 @@ gupnp_service_proxy_send_action_list (GUPnPServiceProxy *proxy,
                                       GList             *out_types,
                                       GList            **out_values);
 
-
+gboolean
+gupnp_service_proxy_send_action_list_gi (GUPnPServiceProxy *proxy,
+                                         const char        *action,
+                                         GList             *in_names,
+                                         GList             *in_values,
+                                         GList             *out_names,
+                                         GList             *out_types,
+                                         GList            **out_values,
+                                         GError           **error);
 GUPnPServiceProxyAction *
 gupnp_service_proxy_begin_action   (GUPnPServiceProxy              *proxy,
                                     const char                     *action,
@@ -174,13 +186,15 @@ gupnp_service_proxy_begin_action_list
                                     GUPnPServiceProxyActionCallback callback,
                                     gpointer                        user_data);
 
+#ifndef GUPNP_DISABLE_DEPRECATED
 GUPnPServiceProxyAction *
 gupnp_service_proxy_begin_action_hash
                                    (GUPnPServiceProxy              *proxy,
                                     const char                     *action,
                                     GUPnPServiceProxyActionCallback callback,
                                     gpointer                        user_data,
-                                    GHashTable                     *hash);
+                                    GHashTable                     *hash) G_GNUC_DEPRECATED;
+#endif
 
 gboolean
 gupnp_service_proxy_end_action     (GUPnPServiceProxy              *proxy,
@@ -205,6 +219,22 @@ gupnp_service_proxy_end_action_list
                                    GList                  **out_values);
 
 gboolean
+gupnp_service_proxy_end_action_list_gi
+                                  (GUPnPServiceProxy       *proxy,
+                                   GUPnPServiceProxyAction *action,
+                                   GList                   *out_names,
+                                   GList                   *out_types,
+                                   GList                  **out_values,
+                                   GError                  **error);
+
+gboolean
+gupnp_service_proxy_end_action_hash_gi
+                                   (GUPnPServiceProxy              *proxy,
+                                    GUPnPServiceProxyAction        *action,
+                                    GHashTable                     *hash,
+                                    GError                        **error);
+
+gboolean
 gupnp_service_proxy_end_action_hash
                                    (GUPnPServiceProxy              *proxy,
                                     GUPnPServiceProxyAction        *action,
@@ -223,8 +253,28 @@ gupnp_service_proxy_add_notify     (GUPnPServiceProxy              *proxy,
                                     gpointer                        user_data);
 
 gboolean
+gupnp_service_proxy_add_notify_full (GUPnPServiceProxy              *proxy,
+                                     const char                     *variable,
+                                     GType                           type,
+                                     GUPnPServiceProxyNotifyCallback callback,
+                                     gpointer                        user_data,
+                                     GDestroyNotify                  notify);
+
+gboolean
+gupnp_service_proxy_add_raw_notify (GUPnPServiceProxy              *proxy,
+                                    GUPnPServiceProxyNotifyCallback callback,
+                                    gpointer                        user_data,
+                                    GDestroyNotify                  notify);
+
+gboolean
 gupnp_service_proxy_remove_notify  (GUPnPServiceProxy              *proxy,
                                     const char                     *variable,
+                                    GUPnPServiceProxyNotifyCallback callback,
+                                    gpointer                        user_data);
+
+gboolean
+gupnp_service_proxy_remove_raw_notify
+                                   (GUPnPServiceProxy              *proxy,
                                     GUPnPServiceProxyNotifyCallback callback,
                                     gpointer                        user_data);
 
@@ -234,6 +284,7 @@ gupnp_service_proxy_set_subscribed (GUPnPServiceProxy              *proxy,
 
 gboolean
 gupnp_service_proxy_get_subscribed (GUPnPServiceProxy              *proxy);
+
 
 G_END_DECLS
 

@@ -1,4 +1,4 @@
-LTVERSION = 4:0:0
+LTVERSION = 4:1:0
 
 if OS_WIN32
 CONTEXT_MANAGER_IMPL = gupnp-windows-context-manager.c \
@@ -7,8 +7,12 @@ CONTEXT_MANAGER_CFLAGS =
 CONTEXT_MANAGER_LIBS = -lws2_32 -liphlpapi
 WIN32_LDFLAGS = -no-undefined
 else
+if HAVE_IFADDRS_H
 CONTEXT_MANAGER_IMPL = gupnp-unix-context-manager.c \
 					   gupnp-unix-context-manager.h
+else
+CONTEXT_MANAGER_IMPL =
+endif
 if USE_NETWORK_MANAGER
 CONTEXT_MANAGER_IMPL += gupnp-network-manager.c  \
 		        gupnp-network-manager.h
@@ -37,14 +41,17 @@ endif
 AM_CFLAGS = $(LIBGUPNP_CFLAGS) \
 	    $(DBUS_GLIB_CFLAGS) \
 	    $(NETLINK_CFLAGS) \
+		$(GUUL_CFLAGS) \
 	    -I$(top_srcdir) \
-	    $(CONTEXT_MANAGER_CFLAGS)
+	    $(CONTEXT_MANAGER_CFLAGS) \
+        $(WARN_CFLAGS)
 
 libgupnpincdir = $(includedir)/gupnp-1.0/libgupnp
 
 lib_LTLIBRARIES = libgupnp-1.0.la
 
-libgupnpinc_HEADERS = gupnp-context.h			\
+libgupnpinc_HEADERS = gupnp-acl.h			\
+		      gupnp-context.h			\
 		      gupnp-context-manager.h		\
 		      gupnp-control-point.h		\
 		      gupnp-device.h			\
@@ -58,10 +65,13 @@ libgupnpinc_HEADERS = gupnp-context.h			\
 		      gupnp-service-proxy.h		\
 		      gupnp-service-introspection.h	\
 		      gupnp-xml-doc.h	                \
+		      gupnp-white-list.h                \
 		      gupnp-types.h			\
+		      gupnp-uuid.h			\
 		      gupnp.h
 
 introspection_sources = $(libgupnpinc_HEADERS) \
+			gupnp-acl.c			\
 			gupnp-context.c			\
 			gupnp-context-manager.c		\
 			gupnp-control-point.c		\
@@ -76,6 +86,7 @@ introspection_sources = $(libgupnpinc_HEADERS) \
 			gupnp-service-proxy.c		\
 			gupnp-service-introspection.c	\
 			gupnp-xml-doc.c			\
+			gupnp-white-list.c		\
 			gupnp-types.c
 
 
@@ -87,7 +98,7 @@ gupnp-marshal.h: gupnp-marshal.list
 
 BUILT_SOURCES = gupnp-marshal.c gupnp-marshal.h
 
-libgupnp_1_0_la_LDFLAGS = -version-info $(LTVERSION) $(WIN32_LDFLAGS)
+libgupnp_1_0_la_LDFLAGS = -version-info $(LTVERSION) $(WIN32_LDFLAGS) $(WARN_LDFLAGS)
 
 libgupnp_1_0_la_SOURCES = $(introspection_sources)		\
 			  http-headers.c			\
@@ -100,15 +111,18 @@ libgupnp_1_0_la_SOURCES = $(introspection_sources)		\
 			  gupnp-error-private.h			\
 			  gupnp-resource-factory-private.h	\
 			  gupnp-service-introspection-private.h	\
+                          gupnp-acl-private.h                   \
 			  gupnp-types-private.h			\
 			  gvalue-util.c				\
 			  gvalue-util.h				\
 			  xml-util.c				\
 			  xml-util.h				\
 			  gena-protocol.h			\
+			  guul.c \
+			  guul.h \
 			  $(BUILT_SOURCES)
 
-libgupnp_1_0_la_LIBADD = $(LIBGUPNP_LIBS) $(DBUS_GLIB_LIBS) $(CONTEXT_MANAGER_LIBS)
+libgupnp_1_0_la_LIBADD = $(LIBGUPNP_LIBS) $(DBUS_GLIB_LIBS) $(CONTEXT_MANAGER_LIBS) $(GUUL_LIBS)
 
 EXTRA_DIST = gupnp-marshal.list 	   \
 	     gupnp-network-manager.c   	   \
@@ -124,11 +138,12 @@ EXTRA_DIST = gupnp-marshal.list 	   \
 
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS =
-INTROSPECTION_SCANNER_ARGS = --warn-all			\
+INTROSPECTION_SCANNER_ARGS = \
 			     --symbol-prefix=gupnp	\
 			     --identifier-prefix=GUPnP	\
 			     --add-include-path=$(top_srcdir) \
-			     --pkg-export=gupnp-1.0
+			     --pkg-export=gupnp-1.0 \
+                 $(WARN_SCANNERFLAGS)
 INTROSPECTION_COMPILER_ARGS = --includedir=$(top_srcdir)
 
 if HAVE_INTROSPECTION

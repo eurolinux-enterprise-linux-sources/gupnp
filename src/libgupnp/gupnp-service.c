@@ -31,21 +31,20 @@
 #include <gmodule.h>
 #include <libsoup/soup-date.h>
 #include <string.h>
+
 #include "gupnp-service.h"
 #include "gupnp-root-device.h"
 #include "gupnp-context-private.h"
 #include "gupnp-marshal.h"
 #include "gupnp-error.h"
+#include "gupnp-acl.h"
+#include "gupnp-uuid.h"
 #include "http-headers.h"
 #include "gena-protocol.h"
 #include "xml-util.h"
 #include "gvalue-util.h"
 
-#ifdef G_OS_WIN32
-#include <rpc.h>
-#else
-#include <uuid/uuid.h>
-#endif
+#include "guul.h"
 
 #define SUBSCRIPTION_TIMEOUT 300 /* DLNA (7.2.22.1) enforced */
 
@@ -54,19 +53,23 @@ G_DEFINE_TYPE (GUPnPService,
                GUPNP_TYPE_SERVICE_INFO);
 
 struct _GUPnPServicePrivate {
-        GUPnPRootDevice *root_device;
+        GUPnPRootDevice           *root_device;
 
-        SoupSession     *session;
+        SoupSession               *session;
 
-        guint            notify_available_id;
+        guint                      notify_available_id;
 
-        GHashTable      *subscriptions;
+        GHashTable                *subscriptions;
 
-        GList           *state_variables;
+        GList                     *state_variables;
 
-        GQueue          *notify_queue;
+        GQueue                    *notify_queue;
 
-        gboolean         notify_frozen;
+        gboolean                   notify_frozen;
+
+        GUPnPServiceIntrospection *introspection;
+
+        GList                     *pending_autoconnect;
 };
 
 enum {
@@ -90,6 +93,12 @@ static void
 notify_subscriber   (gpointer key,
                      gpointer value,
                      gpointer user_data);
+
+GUPnPServiceAction *
+gupnp_service_action_ref (GUPnPServiceAction *action);
+
+void
+gupnp_service_action_unref (GUPnPServiceAction *action);
 
 typedef struct {
         GUPnPService *service;
@@ -124,12 +133,8 @@ gupnp_service_get_session (GUPnPService *service)
                  * order. The session from GUPnPContext may use
                  * multiple connections.
                  */
-                service->priv->session = soup_session_async_new_with_options
-                  (SOUP_SESSION_IDLE_TIMEOUT, 60,
-                   SOUP_SESSION_ASYNC_CONTEXT,
-                   g_main_context_get_thread_default (),
-                   SOUP_SESSION_MAX_CONNS_PER_HOST, 1,
-                   NULL);
+                service->priv->session = soup_session_new_with_options (SOUP_SESSION_MAX_CONNS_PER_HOST, 1,
+                                                                        NULL);
 
                 if (g_getenv ("GUPNP_DEBUG")) {
                         SoupLogger *logger;
@@ -166,11 +171,7 @@ subscription_data_free (SubscriptionData *data)
         }
        
         /* Further cleanup */
-        while (data->callbacks) {
-                g_free (data->callbacks->data);
-                data->callbacks = g_list_delete_link (data->callbacks,
-                                                      data->callbacks);
-        }
+        g_list_free_full (data->callbacks, g_free);
 
         g_free (data->sid);
 
@@ -355,7 +356,7 @@ gupnp_service_action_get_locales (GUPnPServiceAction *action)
 /**
  * gupnp_service_action_get:
  * @action: A #GUPnPServiceAction
- * @Varargs: tuples of argument name, argument type, and argument value
+ * @...: tuples of argument name, argument type, and argument value
  * location, terminated with %NULL.
  *
  * Retrieves the specified action arguments.
@@ -425,8 +426,10 @@ gupnp_service_action_get_valist (GUPnPServiceAction *action,
  * A variant of #gupnp_service_action_get that uses #GList instead of varargs.
  *
  * Return value: (element-type GValue) (transfer full): The values as #GList of
- * #GValue. #g_list_free the returned list and #g_value_unset and #g_slice_free
+ * #GValue. g_list_free() the returned list and g_value_unset() and g_slice_free()
  * each element.
+ *
+ * Since: 0.13.3
  **/
 GList *
 gupnp_service_action_get_values (GUPnPServiceAction *action,
@@ -497,19 +500,19 @@ gupnp_service_action_get_value (GUPnPServiceAction *action,
 }
 
 /**
- * gupnp_service_action_get_gvalue:
+ * gupnp_service_action_get_gvalue: (rename-to gupnp_service_action_get_value)
  * @action: A #GUPnPServiceAction
  * @argument: The name of the argument to retrieve
  * @type: The type of argument to retrieve
  *
  * Retrieves the value of @argument into a GValue of type @type and returns it.
  * The method exists only and only to satify PyGI, please use
- * #gupnp_service_action_get_value and ignore this if possible.
+ * gupnp_service_action_get_value() and ignore this if possible.
  *
  * Return value: (transfer full): Value as #GValue associated with @action.
- * #g_value_unset and #g_slice_free it after usage.
+ * g_value_unset() and g_slice_free() it after usage.
  *
- * Rename To: gupnp_service_action_get_value
+ * Since: 0.13.3
  **/
 GValue *
 gupnp_service_action_get_gvalue (GUPnPServiceAction *action,
@@ -533,6 +536,8 @@ gupnp_service_action_get_gvalue (GUPnPServiceAction *action,
  * Get the number of IN arguments from the @action and return it.
  *
  * Return value: The number of IN arguments from the @action.
+ *
+ * Since: 0.17.0
  */
 guint
 gupnp_service_action_get_argument_count (GUPnPServiceAction *action)
@@ -543,7 +548,7 @@ gupnp_service_action_get_argument_count (GUPnPServiceAction *action)
 /**
  * gupnp_service_action_set:
  * @action: A #GUPnPServiceAction
- * @Varargs: tuples of return value name, return value type, and
+ * @...: tuples of return value name, return value type, and
  * actual return value, terminated with %NULL.
  *
  * Sets the specified action return values.
@@ -615,6 +620,8 @@ gupnp_service_action_set_valist (GUPnPServiceAction *action,
  * #GValues) that line up with @arg_names.
  *
  * Sets the specified action return values.
+ *
+ * Since: 0.13.3
  **/
 void
 gupnp_service_action_set_values (GUPnPServiceAction *action,
@@ -791,6 +798,8 @@ gupnp_service_action_return_error (GUPnPServiceAction *action,
  *
  * Return value: (transfer full): #SoupMessage associated with @action. Unref
  * after using it.
+ *
+ * Since: 0.13.0
  **/
 SoupMessage *
 gupnp_service_action_get_message (GUPnPServiceAction *action)
@@ -927,6 +936,14 @@ control_server_handler (SoupServer                      *server,
                 soup_message_set_status (msg, SOUP_STATUS_BAD_REQUEST);
 
                 return;
+        }
+
+        /* DLNA 7.2.5.6: Always use HTTP 1.1 */
+        if (soup_message_get_http_version (msg) == SOUP_HTTP_1_0) {
+                soup_message_set_http_version (msg, SOUP_HTTP_1_1);
+                soup_message_headers_append (msg->response_headers,
+                                             "Connection",
+                                             "close");
         }
 
         context = gupnp_service_info_get_context (GUPNP_SERVICE_INFO (service));
@@ -1078,34 +1095,32 @@ subscription_response (GUPnPService *service,
         soup_message_set_status (msg, SOUP_STATUS_OK);
 }
 
+/**
+ * gupnp_get_uuid:
+ *
+ * Generate and return a new UUID.
+ *
+ * Returns: (transfer full): A newly generated UUID in string representation.
+ */
+char *
+gupnp_get_uuid (void)
+{
+        return guul_get_uuid ();
+}
+
 /* Generates a new SID */
 static char *
 generate_sid (void)
 {
-#ifdef G_OS_WIN32
         char *ret = NULL;
-        UUID uuid;
-        RPC_STATUS stat;
-        stat = UuidCreate (&uuid);
-        if (stat == RPC_S_OK) {
-                unsigned char* uuidStr = NULL;
-                stat = UuidToString (&uuid, &uuidStr);
-                if (stat == RPC_S_OK) {
-                        ret = g_strdup_printf ("uuid:%s", uuidStr);
-                        RpcStringFree (&uuidStr);
-                }
-        }
+        char *uuid;
+
+
+        uuid = guul_get_uuid ();
+        ret = g_strdup_printf ("uuid:%s", uuid);
+        g_free (uuid);
 
         return ret;
-#else
-        uuid_t id;
-        char out[39];
-
-        uuid_generate (id);
-        uuid_unparse (id, out);
-
-        return g_strdup_printf ("uuid:%s", out);
-#endif
 }
 
 /* Subscription expired */
@@ -1370,6 +1385,26 @@ got_introspection (GUPnPServiceInfo          *info,
         gpointer data;
 
         if (introspection) {
+                /* Handle pending auto-connects */
+                service->priv->introspection  = g_object_ref (introspection);
+
+                /* _autoconnect() just calls prepend() so we reverse the list
+                 * here.
+                 */
+                service->priv->pending_autoconnect =
+                            g_list_reverse (service->priv->pending_autoconnect);
+
+                /* Re-call _autoconnect(). This will not fill
+                 * pending_autoconnect because we set the introspection member
+                 * variable before */
+                for (l = service->priv->pending_autoconnect; l; l = l->next)
+                        gupnp_service_signals_autoconnect (service,
+                                                           l->data,
+                                                           NULL);
+
+                g_list_free (service->priv->pending_autoconnect);
+                service->priv->pending_autoconnect = NULL;
+
                 state_variables =
                         gupnp_service_introspection_list_state_variables
                                 (introspection);
@@ -1424,7 +1459,7 @@ gupnp_service_constructor (GType                  type,
         GObject *object;
         GUPnPServiceInfo *info;
         GUPnPContext *context;
-        SoupServer *server;
+        AclServerHandler *handler;
         char *url;
         char *path;
 
@@ -1435,7 +1470,7 @@ gupnp_service_constructor (GType                  type,
                                             n_construct_params,
                                             construct_params);
 
-        info    = GUPNP_SERVICE_INFO (object);
+        info = GUPNP_SERVICE_INFO (object);
 
         /* Get introspection and save state variable names */
         gupnp_service_info_get_introspection_async (info,
@@ -1444,21 +1479,28 @@ gupnp_service_constructor (GType                  type,
 
         /* Get server */
         context = gupnp_service_info_get_context (info);
-        server = gupnp_context_get_server (context);
 
         /* Run listener on controlURL */
         url = gupnp_service_info_get_control_url (info);
         path = path_from_url (url);
-        soup_server_add_handler (server, path,
-                                 control_server_handler, object, NULL);
+        handler = acl_server_handler_new (GUPNP_SERVICE (object),
+                                          context,
+                                          control_server_handler,
+                                          object,
+                                          NULL);
+        _gupnp_context_add_server_handler_with_data (context, path, handler);
         g_free (path);
         g_free (url);
 
         /* Run listener on eventSubscriptionURL */
         url = gupnp_service_info_get_event_subscription_url (info);
         path = path_from_url (url);
-        soup_server_add_handler (server, path,
-                                 subscription_server_handler, object, NULL);
+        handler = acl_server_handler_new (GUPNP_SERVICE (object),
+                                          context,
+                                          subscription_server_handler,
+                                          object,
+                                          NULL);
+        _gupnp_context_add_server_handler_with_data (context, path, handler);
         g_free (path);
         g_free (url);
 
@@ -1545,7 +1587,6 @@ gupnp_service_dispose (GObject *object)
         GObjectClass *object_class;
         GUPnPServiceInfo *info;
         GUPnPContext *context;
-        SoupServer *server;
         char *url;
         char *path;
 
@@ -1554,19 +1595,18 @@ gupnp_service_dispose (GObject *object)
         /* Get server */
         info = GUPNP_SERVICE_INFO (service);
         context = gupnp_service_info_get_context (info);
-        server = gupnp_context_get_server (context);
 
         /* Remove listener on controlURL */
         url = gupnp_service_info_get_control_url (info);
         path = path_from_url (url);
-        soup_server_remove_handler (server, path);
+        gupnp_context_remove_server_handler (context, path);
         g_free (path);
         g_free (url);
 
         /* Remove listener on eventSubscriptionURL */
         url = gupnp_service_info_get_event_subscription_url (info);
         path = path_from_url (url);
-        soup_server_remove_handler (server, path);
+        gupnp_context_remove_server_handler (context, path);
         g_free (path);
         g_free (url);
 
@@ -1609,12 +1649,7 @@ gupnp_service_finalize (GObject *object)
         g_hash_table_destroy (service->priv->subscriptions);
 
         /* Free state variable list */
-        while (service->priv->state_variables) {
-                g_free (service->priv->state_variables->data);
-                service->priv->state_variables =
-                        g_list_delete_link (service->priv->state_variables,
-                                            service->priv->state_variables);
-        }
+        g_list_free_full (service->priv->state_variables, g_free);
 
         /* Free notify queue */
         while ((data = g_queue_pop_head (service->priv->notify_queue)))
@@ -1625,6 +1660,11 @@ gupnp_service_finalize (GObject *object)
         if (service->priv->session) {
                 g_object_unref (service->priv->session);
                 service->priv->session = NULL;
+        }
+
+        if (service->priv->introspection) {
+                g_object_unref (service->priv->introspection);
+                service->priv->introspection = NULL;
         }
 
         /* Call super */
@@ -1737,7 +1777,7 @@ gupnp_service_class_init (GUPnPServiceClass *klass)
 /**
  * gupnp_service_notify:
  * @service: A #GUPnPService
- * @Varargs: Tuples of variable name, variable type, and variable value,
+ * @...: Tuples of variable name, variable type, and variable value,
  * terminated with %NULL.
  *
  * Notifies listening clients that the properties listed in @Varargs
@@ -1832,23 +1872,20 @@ notify_got_response (G_GNUC_UNUSED SoupSession *session,
         } else {
                 /* Other failure: Try next callback or signal failure. */
                 if (data->callbacks->next) {
-                        SoupURI *uri;
-                        SoupSession *service_session;
+                        SoupBuffer *buffer;
+                        guint8 *property_set;
+                        gsize length;
 
                         /* Call next callback */
                         data->callbacks = data->callbacks->next;
 
-                        uri = soup_uri_new (data->callbacks->data);
-                        soup_message_set_uri (msg, uri);
-                        soup_uri_free (uri);
-
-                        /* And re-queue */
-                        data->pending_messages = 
-                                g_list_prepend (data->pending_messages, msg);
-
-                        service_session = gupnp_service_get_session (data->service);
-
-                        soup_session_requeue_message (service_session, msg);
+                        /* Get property-set from old message */
+                        buffer = soup_message_body_flatten (msg->request_body);
+                        soup_buffer_get_data (buffer,
+                                              (const guint8 **) &property_set,
+                                              &length);
+                        notify_subscriber (NULL, data, property_set);
+                        soup_buffer_free (buffer);
                 } else {
                         /* Emit 'notify-failed' signal */
                         GError *error;
@@ -2191,7 +2228,7 @@ connect_names_to_signal_handlers (GUPnPService *service,
  * A convenience function that attempts to connect all possible
  * #GUPnPService::action-invoked and #GUPnPService::query-variable signals to
  * appropriate callbacks for the service @service. It uses service introspection
- * and GModule's introspective features. It is very simillar to
+ * and #GModule<!-- -->'s introspective features. It is very simillar to
  * gtk_builder_connect_signals() except that it attempts to guess the names of
  * the signal handlers on its own.
  *
@@ -2200,17 +2237,18 @@ connect_names_to_signal_handlers (GUPnPService *service,
  * off the action names and either prepend "on_" or append "_cb" to them. Same
  * goes for #GUPnPService::query-variable signals, except that "query_" should
  * be prepended to the variable name. For example, callback function for
- * "GetSystemUpdateID" action should be either named as
+ * <varname>GetSystemUpdateID</varname> action should be either named as
  * "get_system_update_id_cb" or "on_get_system_update_id" and callback function
  * for the query of "SystemUpdateID" state variable should be named
- * "query_system_update_id_cb" or "on_query_system_update_id".
+ * <function>query_system_update_id_cb</function> or
+ * <function>on_query_system_update_id</function>.
  *
- * Note that this function will not work correctly if GModule is not supported
- * on the platform or introspection is not available for service @service.
+ * <note>This function will not work correctly if #GModule is not supported
+ * on the platform or introspection is not available for @service.</note>
  *
- * WARNING: This function can not and therefore does not guarantee that the
+ * <warning>This function can not and therefore does not guarantee that the
  * resulting signal connections will be correct as it depends heavily on a
- * particular naming schemes described above.
+ * particular naming schemes described above.</warning>
  **/
 void
 gupnp_service_signals_autoconnect (GUPnPService *service,
@@ -2223,18 +2261,22 @@ gupnp_service_signals_autoconnect (GUPnPService *service,
 
         g_return_if_fail (GUPNP_IS_SERVICE (service));
 
-        introspection = gupnp_service_info_get_introspection
-                                (GUPNP_SERVICE_INFO (service),
-                                 error);
-        if (!introspection)
+        introspection = service->priv->introspection;
+
+        if (!introspection) {
+                /* Initial introspection is not done yet, delay until we
+                 * received that */
+                service->priv->pending_autoconnect =
+                    g_list_prepend (service->priv->pending_autoconnect,
+                                    user_data);
+
                 return;
+        }
 
         /* Get a handle on the main executable -- use this to find symbols */
         module = g_module_open (NULL, 0);
         if (module == NULL) {
                 g_error ("Failed to open module: %s", g_module_error ());
-
-                g_object_unref (introspection);
 
                 return;
         }
@@ -2257,5 +2299,4 @@ gupnp_service_signals_autoconnect (GUPnPService *service,
                                           user_data);
 
         g_module_close (module);
-        g_object_unref (introspection);
 }

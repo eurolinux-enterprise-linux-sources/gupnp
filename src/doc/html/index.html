@@ -2,11 +2,11 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>GUPnP Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<title>GUPnP Reference Manual: GUPnP Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="index.html" title="GUPnP Reference Manual">
 <link rel="next" href="tutorial.html" title="Part I. Tutorial">
-<meta name="generator" content="GTK-Doc V1.18.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -14,11 +14,11 @@
 <div class="titlepage">
 <div>
 <div><table class="navigation" id="top" width="100%" cellpadding="2" cellspacing="0"><tr><th valign="middle"><p class="title">GUPnP Reference Manual</p></th></tr></table></div>
-<div><p class="releaseinfo">Version 0.20.3
+<div><p class="releaseinfo">Version 1.0.1
 </p></div>
 <div><p class="copyright">Copyright © 2007, 2008, 2009 OpenedHand Ltd, Nokia Corporation</p></div>
 <div><div class="legalnotice">
-<a name="id345759"></a><p>
+<a name="id-1.1.4"></a><p>
         Permission is granted to copy, distribute and/or modify this
         document under the terms of the <em class="citetitle">GNU Free
         Documentation License</em>, Version 1.1 or any later
@@ -31,17 +31,18 @@
 
         </p>
 <div class="address"><p><br>
-          The Free Software Foundation, Inc.,<br>
-          <span class="street">59 Temple Place</span> - Suite 330,<br>
-          <span class="city">Boston</span>, <span class="state">MA</span> <span class="postcode">02111-1307</span>,<br>
-          <span class="country">USA</span></p></div>
+          Free Software Foundation<br>
+          <span class="street">51 Franklin Street</span>, Fifth Floor<br>
+          <span class="city">Boston</span>, <span class="state">MA</span> <span class="postcode">02110-1335</span>,<br>
+          <span class="country">USA</span><br>
+        </p></div>
 <p>
       </p>
 </div></div>
 </div>
 <hr>
 </div>
-<div class="toc"><dl>
+<div class="toc"><dl class="toc">
 <dt><span class="part"><a href="tutorial.html">I. Tutorial</a></span></dt>
 <dd><dl>
 <dt><span class="chapter"><a href="overview.html">Overview</a></span></dt>
@@ -86,13 +87,23 @@
 <span class="refentrytitle"><a href="GUPnPService.html">GUPnPService</a></span><span class="refpurpose"> — Class for service implementations.</span>
 </dt>
 </dl></dd>
-<dt><span class="chapter"><a href="api-utility.html">Utility Functions</a></span></dt>
+<dt><span class="chapter"><a href="api-context.html">Network context handling</a></span></dt>
 <dd><dl>
 <dt>
 <span class="refentrytitle"><a href="GUPnPContext.html">GUPnPContext</a></span><span class="refpurpose"> — Context object wrapping shared networking bits.</span>
 </dt>
 <dt>
-<span class="refentrytitle"><a href="GUPnPContextManager.html">GUPnPContextManager</a></span><span class="refpurpose"> — Manages <a class="link" href="GUPnPContext.html" title="GUPnPContext"><span class="type">GUPnPContext</span></a> objects.</span>
+<span class="refentrytitle"><a href="GUPnPContextManager.html">GUPnPContextManager</a></span><span class="refpurpose"> — Manages GUPnPContext objects.</span>
+</dt>
+</dl></dd>
+<dt><span class="chapter"><a href="api-utility.html">Utility Functions</a></span></dt>
+<dd><dl>
+<dt>
+<span class="refentrytitle"><a href="GUPnPAcl.html">GUPnPAcl</a></span><span class="refpurpose"> — Object providing a simple access control list for
+GUPnP.</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="GUPnPWhiteList.html">GUPnPWhiteList</a></span><span class="refpurpose"> — Class for network filtering.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="GUPnPResourceFactory.html">GUPnPResourceFactory</a></span><span class="refpurpose"> — Class for resource and resource proxy object creation.</span>
@@ -106,6 +117,9 @@
 <dt>
 <span class="refentrytitle"><a href="gupnp-Special-UPnP-types.html">Special UPnP types</a></span><span class="refpurpose"> — Extra types for use when calling UPnP actions.</span>
 </dt>
+<dt>
+<span class="refentrytitle"><a href="gupnp-Utility-functions.html">Utility functions</a></span><span class="refpurpose"></span>
+</dt>
 </dl></dd>
 <dt><span class="chapter"><a href="api-tools.html">Tools</a></span></dt>
 <dd><dl><dt>
@@ -118,12 +132,26 @@
 <dt><span class="chapter"><a href="schemas-service.html">Service Description</a></span></dt>
 </dl></dd>
 <dt><span class="glossary"><a href="glossary.html">Glossary</a></span></dt>
+<dt><span class="index"><a href="api-index-full.html">Index of all symbols</a></span></dt>
+<dt><span class="index"><a href="api-index-deprecated.html">Index of deprecated symbols</a></span></dt>
+<dt><span class="index"><a href="api-index-0-12-3.html">Index of new symbols in 0.12.3</a></span></dt>
+<dt><span class="index"><a href="api-index-0-13-0.html">Index of new symbols in 0.13.0</a></span></dt>
+<dt><span class="index"><a href="api-index-0-13-3.html">Index of new symbols in 0.13.3</a></span></dt>
+<dt><span class="index"><a href="api-index-0-17-0.html">Index of new symbols in 0.17.0</a></span></dt>
+<dt><span class="index"><a href="api-index-0-17-2.html">Index of new symbols in 0.17.2</a></span></dt>
+<dt><span class="index"><a href="api-index-0-19-1.html">Index of new symbols in 0.19.1</a></span></dt>
+<dt><span class="index"><a href="api-index-0-19-2.html">Index of new symbols in 0.19.2</a></span></dt>
+<dt><span class="index"><a href="api-index-0-20-3.html">Index of new symbols in 0.20.3</a></span></dt>
+<dt><span class="index"><a href="api-index-0-20-4.html">Index of new symbols in 0.20.4</a></span></dt>
+<dt><span class="index"><a href="api-index-0-20-5.html">Index of new symbols in 0.20.5</a></span></dt>
+<dt><span class="index"><a href="api-index-0-20-8.html">Index of new symbols in 0.20.8</a></span></dt>
+<dt><span class="index"><a href="api-index-0-20-9.html">Index of new symbols in 0.20.9</a></span></dt>
+<dt><span class="index"><a href="api-index-0-20-11.html">Index of new symbols in 0.20.11</a></span></dt>
+<dt><span class="index"><a href="api-index-0-20-12.html">Index of new symbols in 0.20.12</a></span></dt>
 <dt><span class="glossary"><a href="annotation-glossary.html">Annotation Glossary</a></span></dt>
-<dt><span class="index"><a href="ix01.html">Index</a></span></dt>
 </dl></div>
 </div>
 <div class="footer">
-<hr>
-          Generated by GTK-Doc V1.18.1</div>
+<hr>Generated by GTK-Doc V1.25</div>
 </body>
 </html>

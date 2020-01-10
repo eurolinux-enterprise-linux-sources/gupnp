@@ -1,10 +1,28 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* GUUL will be used internally */
+#undef GUUL_INTERNAL
+
+/* Compiling for BSD flavor */
+#undef GUUL_PLATFORM_BSD
+
+/* Using external library */
+#undef GUUL_PLATFORM_GENERIC
+
+/* Compiling for OS X */
+#undef GUUL_PLATFORM_OSX
+
+/* Compiling for windows */
+#undef GUUL_PLATFORM_WINDOWS
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
 /* Define to 1 if you have the `getpagesize' function. */
 #undef HAVE_GETPAGESIZE
+
+/* Define to 1 if you have the <ifaddrs.h> header file. */
+#undef HAVE_IFADDRS_H
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -48,9 +66,11 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
+
+/* Define if debugging is disabled */
+#undef NDEBUG
 
 /* Name of package */
 #undef PACKAGE

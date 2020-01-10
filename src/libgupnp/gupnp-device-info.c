@@ -85,7 +85,7 @@ gupnp_device_info_set_property (GObject      *object,
 
         switch (property_id) {
         case PROP_RESOURCE_FACTORY:
-                info->priv->factory = 
+                info->priv->factory =
                         GUPNP_RESOURCE_FACTORY (g_value_dup_object (value));
                 break;
         case PROP_CONTEXT:
@@ -334,7 +334,7 @@ gupnp_device_info_class_init (GUPnPDeviceInfoClass *klass)
                                       "The XML document related to this "
                                       "device",
                                       GUPNP_TYPE_XML_DOC,
-                                      G_PARAM_WRITABLE |
+                                      G_PARAM_READWRITE |
                                       G_PARAM_CONSTRUCT_ONLY |
                                       G_PARAM_STATIC_NAME |
                                       G_PARAM_STATIC_NICK |
@@ -474,7 +474,7 @@ gupnp_device_info_get_device_type (GUPnPDeviceInfo *info)
  * @info: A #GUPnPDeviceInfo
  *
  * Get the friendly name of the device.
- * 
+ *
  * Return value: A string, or %NULL. g_free() after use.
  **/
 char *
@@ -577,7 +577,7 @@ gupnp_device_info_get_model_number (GUPnPDeviceInfo *info)
  * @info: A #GUPnPDeviceInfo
  *
  * Get a URL pointing to the device model's website.
- * 
+ *
  * Return value: A string, or %NULL. g_free() after use.
  **/
 char *
@@ -595,7 +595,7 @@ gupnp_device_info_get_model_url (GUPnPDeviceInfo *info)
  * @info: A #GUPnPDeviceInfo
  *
  * Get the serial number of the device.
- * 
+ *
  * Return value: A string, or %NULL. g_free() after use.
  **/
 char *
@@ -630,7 +630,7 @@ gupnp_device_info_get_upc (GUPnPDeviceInfo *info)
  *
  * Get a URL pointing to the device's presentation page, for web-based
  * administration.
- * 
+ *
  * Return value: A string, or %NULL. g_free() after use.
  **/
 char *
@@ -751,9 +751,12 @@ gupnp_device_info_get_icon_url (GUPnPDeviceInfo *info,
                         icon = icon_parse (info, element);
 
                         if (requested_mime_type) {
-                                mime_type_ok =
-                                        !strcmp (requested_mime_type,
-                                                 (char *) icon->mime_type);
+                                if (icon->mime_type)
+                                        mime_type_ok = !strcmp (
+                                                requested_mime_type,
+                                                (char *) icon->mime_type);
+                                else
+                                        mime_type_ok = FALSE;
                         } else
                                 mime_type_ok = TRUE;
 
@@ -762,31 +765,36 @@ gupnp_device_info_get_icon_url (GUPnPDeviceInfo *info,
 
                         /* Filter out icons with incorrect mime type or
                          * incorrect depth. */
+                        /* Note: Meaning of 'weight' changes when no
+                         * size request is included. */
                         if (mime_type_ok && icon->weight >= 0) {
-                                if (requested_width >= 0) {
-                                        if (prefer_bigger) {
-                                                icon->weight +=
-                                                        icon->width -
-                                                        requested_width;
-                                        } else {
-                                                icon->weight +=
-                                                        requested_width -
-                                                        icon->width;
+                                if (requested_width < 0 && requested_height < 0) {
+                                        icon->weight = icon->width * icon->height;
+                                } else {
+                                        if (requested_width >= 0) {
+                                                if (prefer_bigger) {
+                                                        icon->weight +=
+                                                                icon->width -
+                                                                requested_width;
+                                                } else {
+                                                        icon->weight +=
+                                                                requested_width -
+                                                                icon->width;
+                                                }
+                                        }
+
+                                        if (requested_height >= 0) {
+                                                if (prefer_bigger) {
+                                                        icon->weight +=
+                                                                icon->height -
+                                                                requested_height;
+                                                } else {
+                                                        icon->weight +=
+                                                                requested_height -
+                                                                icon->height;
+                                                }
                                         }
                                 }
-
-                                if (requested_height >= 0) {
-                                        if (prefer_bigger) {
-                                                icon->weight +=
-                                                        icon->height -
-                                                        requested_height;
-                                        } else {
-                                                icon->weight +=
-                                                        requested_height -
-                                                        icon->height;
-                                        }
-                                }
-
                                 icons = g_list_prepend (icons, icon);
                         } else
                                 icon_free (icon);
@@ -796,15 +804,29 @@ gupnp_device_info_get_icon_url (GUPnPDeviceInfo *info,
         if (icons == NULL)
                 return NULL;
 
-        /* Find closest match */
+        /* If no size was requested, find the largest or smallest */
         closest = NULL;
-        for (l = icons; l; l = l->next) {
-                icon = l->data;
+        if (requested_height < 0 && requested_width < 0) {
+                for (l = icons; l; l = l->next) {
+                        icon = l->data;
 
-                /* Look between icons with positive weight first */
-                if (icon->weight >= 0) {
-                        if (!closest || icon->weight < closest->weight)
+                        if (!closest ||
+                            (prefer_bigger && icon->weight > closest->weight) ||
+                            (!prefer_bigger && icon->weight < closest->weight))
                                 closest = icon;
+                }
+        }
+
+        /* Find the match closest to requested size */
+        if (!closest) {
+                for (l = icons; l; l = l->next) {
+                        icon = l->data;
+
+                        /* Look between icons with positive weight first */
+                        if (icon->weight >= 0) {
+                                if (!closest || icon->weight < closest->weight)
+                                        closest = icon;
+                        }
                 }
         }
 
@@ -861,15 +883,12 @@ gupnp_device_info_get_icon_url (GUPnPDeviceInfo *info,
         }
 
         /* Cleanup */
-        while (icons) {
-                icon_free (icons->data);
-                icons = g_list_delete_link (icons, icons);
-        }
+        g_list_free_full (icons, (GDestroyNotify) icon_free);
 
         return ret;
 }
 
-/* Returns TRUE if @query matches against @base. 
+/* Returns TRUE if @query matches against @base.
  * - If @query does not specify a version, it matches any version specified
  *   in @base.
  * - If @query specifies a version, it matches any version specified in @base
@@ -926,15 +945,61 @@ resource_type_match (const char *query,
 }
 
 /**
+ * gupnp_device_info_list_dlna_device_class_identifier:
+ * @info: A #GUPnPDeviceInfo
+ *
+ * Get a #GList of strings that represent the device class and version as
+ * announced in the device description file using the &lt;dlna:X_DLNADOC&gt;
+ * element.
+ * Returns: (transfer full) (element-type utf8): a #GList of newly allocated strings or
+ * %NULL if the device description doesn't contain the &lt;dlna:X_DLNADOC&gt;
+ * element.
+ *
+ * Since: 0.20.4
+ **/
+GList *
+gupnp_device_info_list_dlna_device_class_identifier (GUPnPDeviceInfo *info)
+{
+        xmlNode *element;
+        GList *list  = NULL;
+
+        g_return_val_if_fail (GUPNP_IS_DEVICE_INFO (info), NULL);
+
+        element = info->priv->element;
+
+        for (element = element->children; element; element = element->next) {
+                /* No early exit since the node explicitly may appear multiple
+                 * times: 7.2.10.3 */
+                if (!strcmp ("X_DLNADOC", (char *) element->name)) {
+                        xmlChar *content = NULL;
+
+                        content = xmlNodeGetContent (element);
+
+                        if (content == NULL)
+                                continue;
+
+                        list = g_list_prepend (list,
+                                               g_strdup ((char *) content));
+                        xmlFree (content);
+                }
+        }
+
+        /* Return in order of appearance in document */
+        return g_list_reverse (list);
+}
+
+/**
  * gupnp_device_info_list_dlna_capabilities:
  * @info: A #GUPnPDeviceInfo
  *
- * Get a #GList of strings that represent the device capabilities as announced 
+ * Get a #GList of strings that represent the device capabilities as announced
  * in the device description file using the &lt;dlna:X_DLNACAP&gt; element.
  *
  * Returns: (transfer full) (element-type utf8): a #GList of newly allocated strings or
  * %NULL if the device description doesn't contain the &lt;dlna:X_DLNACAP&gt;
  * element.
+ *
+ * Since: 0.13.0
  **/
 GList *
 gupnp_device_info_list_dlna_capabilities (GUPnPDeviceInfo *info)
@@ -989,6 +1054,8 @@ gupnp_device_info_list_dlna_capabilities (GUPnPDeviceInfo *info)
  *
  * Return value: a newly allocated string or %NULL if the device
  *               description doesn't contain the given @element
+ *
+ * Since: 0.13.0
  **/
 char *
 gupnp_device_info_get_description_value (GUPnPDeviceInfo *info,
@@ -1116,6 +1183,7 @@ gupnp_device_info_get_device (GUPnPDeviceInfo *info,
         xmlNode *element;
 
         g_return_val_if_fail (GUPNP_IS_DEVICE_INFO (info), NULL);
+        g_return_val_if_fail (type != NULL, NULL);
 
         class = GUPNP_DEVICE_INFO_GET_CLASS (info);
 
@@ -1270,6 +1338,7 @@ gupnp_device_info_get_service (GUPnPDeviceInfo *info,
         xmlNode *element;
 
         g_return_val_if_fail (GUPNP_IS_DEVICE_INFO (info), NULL);
+        g_return_val_if_fail (type != NULL, NULL);
 
         class = GUPNP_DEVICE_INFO_GET_CLASS (info);
 

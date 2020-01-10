@@ -34,7 +34,7 @@
       the <literal>BinaryLight1</literal> device type, but if none of the
       existing device types are suitable a custom device type can be created.
     </para>
-    <programlisting><xi:include href="../../examples/BinaryLight1.xml" parse="text"/></programlisting>
+    <programlisting><xi:include href="../../examples/BinaryLight1.xml" parse="text"><xi:fallback /></xi:include></programlisting>
     <para>
       The <sgmltag>specVersion</sgmltag> tag defines what version of the UPnP
       Device Architecture the document conforms to.  At the time of writing the
@@ -82,7 +82,7 @@
       from the specification.  This is the <literal>SwitchPower1</literal>
       service description file:
     </para>
-    <programlisting><xi:include href="../../examples/SwitchPower1.xml" parse="text"/></programlisting>
+    <programlisting><xi:include href="../../examples/SwitchPower1.xml" parse="text"><xi:fallback /></xi:include></programlisting>
     <para>
       Again, the <sgmltag>specVersion</sgmltag> tag defines the UPnP version
       that is being used.  The rest of the document consists of an
@@ -135,19 +135,15 @@
 /* Create the GUPnP context with default host and port */
 context = gupnp_context_new (NULL, NULL, 0, NULL);</programlisting>
     <para>
-      UPnP uses HTTP to provide the device and service description files, so
-      next we tell GUPnP to publish them.  This is done with
-      gupnp_context_host_path() which takes a local filename to send when a
-      certain server path is requested.
-    </para>
-<programlisting>gupnp_context_host_path (context, "BinaryLight1.xml", "/BinaryLight1.xml");
-gupnp_context_host_path (context, "SwitchPower1.xml", "/SwitchPower1.xml");</programlisting>
-    <para>
-      Next the root device can be created. 
+      Next the root device can be created. The name of the device description
+      file can be passed as an absolute file path or a relative path to the
+      second parameter of gupnp_root_device_new(). The service description
+      files referenced in the device description are expected to be at the path
+      given there as well.
     </para>
     <programlisting>GUPnPRootDevice *dev;
 /* Create the root device object */
-dev = gupnp_root_device_new (context, "/BinaryLight1.xml");
+dev = gupnp_root_device_new (context, "BinaryLight1.xml", ".");
 /* Activate the root device, so that it announces itself */
 gupnp_root_device_set_available (dev, TRUE);</programlisting>
     <para>
@@ -186,14 +182,10 @@ service = gupnp_device_info_get_service
       value of the variable.
     </para>
     <para>
-      There are two approaches that clients can take to handle these signals.
-      They can either connect a single handler to #GUPnPService::action-invoked
-      or #GUPnPService::query-variable and examine the arguments to decide what
-      action to take.  Alternatively, handlers can be targetted at specific
-      actions or variables by using the <firstterm>signal detail</firstterm>
-      when connecting.  For example, this causes
-      <function>on_get_status_action</function> to be called when the
-      <function>GetStatus</function> action is invoked:
+      Handlers should be targetted at specific actions or variables by using
+      the <firstterm>signal detail</firstterm> when connecting. For example,
+      this causes <function>on_get_status_action</function> to be called when
+      the <function>GetStatus</function> action is invoked:
     </para>
     <programlisting>static void on_get_status_action (GUPnPService *service, GUPnPServiceAction *action, gpointer user_data);
 &hellip;

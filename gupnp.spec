@@ -1,20 +1,20 @@
 Name:          gupnp
-Version:       0.20.3
-Release:       3%{?dist}
+Version:       1.0.1
+Release:       1%{?dist}
 Summary:       A framework for creating UPnP devices & control points
 
-Group:         System Environment/Libraries
 License:       LGPLv2+
 URL:           http://www.gupnp.org/
-Source0:       http://download.gnome.org/sources/%{name}/0.20/%{name}-%{version}.tar.xz
+Source0:       http://download.gnome.org/sources/%{name}/1.0/%{name}-%{version}.tar.xz
 
-BuildRequires: gssdp-devel >= 0.13.0
+BuildRequires: gssdp-devel >= 0.14.15
 BuildRequires: gtk-doc
 BuildRequires: gobject-introspection-devel >= 1.36
 BuildRequires: libsoup-devel
 BuildRequires: libxml2-devel
 BuildRequires: libuuid-devel
 BuildRequires: NetworkManager-devel
+BuildRequires: vala
 
 Requires: dbus
 
@@ -25,22 +25,13 @@ The GUPnP API is intended to be easy to use, efficient and flexible.
 
 %package devel
 Summary: Development package for gupnp
-Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
-Requires: glib2-devel
-Requires: gssdp-devel
-Requires: libsoup-devel
-Requires: libxml2-devel
-Requires: libuuid-devel
-Requires: pkgconfig
-Obsoletes: gupnp-vala
+Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
 Files for development with %{name}.
 
 %package docs
 Summary: Documentation files for %{name}
-Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 BuildArch: noarch
 
@@ -55,31 +46,45 @@ This package contains developer documentation for %{name}.
 make %{?_smp_mflags} V=1
 
 %install
-make install DESTDIR=%{buildroot}
+%make_install
 
 #Remove libtool archives.
-find %{buildroot} -name '*.la' -exec rm -f {} ';'
+find %{buildroot} -name '*.la' -delete
+
+%check
+make check %{?_smp_mflags} V=1
 
 %post -p /sbin/ldconfig
 
 %postun -p /sbin/ldconfig
 
 %files
-%doc AUTHORS COPYING README
+%license COPYING
+%doc AUTHORS README
 %{_libdir}/libgupnp-1.0.so.*
-%{_bindir}/gupnp-binding-tool
 %{_libdir}/girepository-1.0/GUPnP-1.0.typelib
 
 %files devel
+%{_bindir}/gupnp-binding-tool
 %{_libdir}/pkgconfig/gupnp-1.0.pc
 %{_libdir}/libgupnp-1.0.so
 %{_includedir}/gupnp-1.0
 %{_datadir}/gir-1.0/GUPnP-1.0.gir
+%{_datadir}/vala/vapi/%{name}*
 
 %files docs
 %doc %{_datadir}/gtk-doc/html/%{name}
 
 %changelog
+* Thu Mar 02 2017 Bastien Nocera <bnocera@redhat.com> - 1.0.1-1
++ gupnp-1.0.1-1
+- Rebase to 1.0.1
+Resolves: #1386985
+
+* Mon Jun 01 2015 Debarshi Ray <rishi@fedoraproject.org> - 0.20.13-1
+- Update to 0.20.13 and re-enable vala bindings
+Resolves: #1225451
+
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 0.20.3-3
 - Mass rebuild 2014-01-24
 
