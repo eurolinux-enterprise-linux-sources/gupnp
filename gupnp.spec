@@ -1,6 +1,6 @@
 Name:          gupnp
 Version:       0.20.3
-Release:       1%{?dist}
+Release:       3%{?dist}
 Summary:       A framework for creating UPnP devices & control points
 
 Group:         System Environment/Libraries
@@ -80,6 +80,12 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %doc %{_datadir}/gtk-doc/html/%{name}
 
 %changelog
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 0.20.3-3
+- Mass rebuild 2014-01-24
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 0.20.3-2
+- Mass rebuild 2013-12-27
+
 * Thu May 30 2013 Peter Robinson <pbrobinson@fedoraproject.org> 0.20.3-1
 - 0.20.3 release
 - http://ftp.gnome.org/pub/GNOME/sources/gupnp/0.20/gupnp-0.20.3.news
