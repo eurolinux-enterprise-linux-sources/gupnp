@@ -84,7 +84,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#guint"><span class="returnvalue">guint</span></a>
+<a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="returnvalue">guint</span></a>
 </td>
 <td class="function_name">
 <a class="link" href="GUPnPContextManager.html#gupnp-context-manager-get-port" title="gupnp_context_manager_get_port ()">gupnp_context_manager_get_port</a> <span class="c_punctuation">()</span>
@@ -111,12 +111,12 @@
 </colgroup>
 <tbody>
 <tr>
-<td class="property_type"><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a></td>
+<td class="property_type"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a></td>
 <td class="property_name"><a class="link" href="GUPnPContextManager.html#GUPnPContextManager--main-context" title="The “main-context” property">main-context</a></td>
 <td class="property_flags">Read / Write / Construct Only</td>
 </tr>
 <tr>
-<td class="property_type"><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a></td>
+<td class="property_type"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="type">guint</span></a></td>
 <td class="property_name"><a class="link" href="GUPnPContextManager.html#GUPnPContextManager--port" title="The “port” property">port</a></td>
 <td class="property_flags">Read / Write / Construct Only</td>
 </tr>
@@ -141,12 +141,12 @@
 <tr>
 <td class="signal_type"><span class="returnvalue">void</span></td>
 <td class="signal_name"><a class="link" href="GUPnPContextManager.html#GUPnPContextManager-context-available" title="The “context-available” signal">context-available</a></td>
-<td class="signal_flags"><a href="https://developer.gnome.org/gobject/unstable/gobject-Signals.html#G-SIGNAL-RUN-FIRST:CAPS">Run First</a></td>
+<td class="signal_flags"><a href="/usr/share/gtk-doc/html/gobjectgobject-Signals.html#G-SIGNAL-RUN-FIRST:CAPS">Run First</a></td>
 </tr>
 <tr>
 <td class="signal_type"><span class="returnvalue">void</span></td>
 <td class="signal_name"><a class="link" href="GUPnPContextManager.html#GUPnPContextManager-context-unavailable" title="The “context-unavailable” signal">context-unavailable</a></td>
-<td class="signal_flags"><a href="https://developer.gnome.org/gobject/unstable/gobject-Signals.html#G-SIGNAL-RUN-FIRST:CAPS">Run First</a></td>
+<td class="signal_flags"><a href="/usr/share/gtk-doc/html/gobjectgobject-Signals.html#G-SIGNAL-RUN-FIRST:CAPS">Run First</a></td>
 </tr>
 </tbody>
 </table></div>
@@ -166,7 +166,7 @@
 </div>
 <div class="refsect1">
 <a name="GUPnPContextManager.object-hierarchy"></a><h2>Object Hierarchy</h2>
-<pre class="screen">    <a href="https://developer.gnome.org/gobject/unstable/gobject-The-Base-Object-Type.html#GObject-struct">GObject</a>
+<pre class="screen">    <a href="/usr/share/gtk-doc/html/gobjectgobject-The-Base-Object-Type.html#GObject-struct">GObject</a>
     <span class="lineart">╰──</span> GUPnPContextManager
 </pre>
 </div>
@@ -181,8 +181,8 @@
 <div class="refsect2">
 <a name="gupnp-context-manager-new"></a><h3>gupnp_context_manager_new ()</h3>
 <pre class="programlisting"><a class="link" href="GUPnPContextManager.html" title="GUPnPContextManager"><span class="returnvalue">GUPnPContextManager</span></a> *
-gupnp_context_manager_new (<em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-The-Main-Event-Loop.html#GMainContext"><span class="type">GMainContext</span></a> *main_context</code></em>,
-                           <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> port</code></em>);</pre>
+gupnp_context_manager_new (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-The-Main-Event-Loop.html#GMainContext"><span class="type">GMainContext</span></a> *main_context</code></em>,
+                           <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="type">guint</span></a> port</code></em>);</pre>
 <div class="warning">
 <p><code class="literal">gupnp_context_manager_new</code> has been deprecated since version 0.17.2 and should not be used in newly-written code.</p>
 <p>Use <a class="link" href="GUPnPContextManager.html#gupnp-context-manager-create" title="gupnp_context_manager_create ()"><code class="function">gupnp_context_manager_create()</code></a>.</p>
@@ -199,9 +199,9 @@ gupnp_context_manager_new (<em class="parameter"><code><a href="https://develope
 <tbody>
 <tr>
 <td class="parameter_name"><p>main_context</p></td>
-<td class="parameter_description"><p> Deprecated: 0.17.2: <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. If you want to use
+<td class="parameter_description"><p> Deprecated: 0.17.2: <a href="/usr/share/gtk-doc/html/glibglib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. If you want to use
 a different main context use
-<a href="https://developer.gnome.org/glib/unstable/glib-The-Main-Event-Loop.html#g-main-context-push-thread-default"><code class="function">g_main_context_push_thread_default()</code></a> instead. </p></td>
+<a href="/usr/share/gtk-doc/html/glibglib-The-Main-Event-Loop.html#g-main-context-push-thread-default"><code class="function">g_main_context_push_thread_default()</code></a> instead. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
@@ -223,7 +223,7 @@ a different main context use
 <div class="refsect2">
 <a name="gupnp-context-manager-create"></a><h3>gupnp_context_manager_create ()</h3>
 <pre class="programlisting"><a class="link" href="GUPnPContextManager.html" title="GUPnPContextManager"><span class="returnvalue">GUPnPContextManager</span></a> *
-gupnp_context_manager_create (<em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> port</code></em>);</pre>
+gupnp_context_manager_create (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="type">guint</span></a> port</code></em>);</pre>
 <p>Factory-method to create a new <a class="link" href="GUPnPContextManager.html" title="GUPnPContextManager"><span class="type">GUPnPContextManager</span></a>. The final type of the
 <a class="link" href="GUPnPContextManager.html" title="GUPnPContextManager"><span class="type">GUPnPContextManager</span></a> depends on the compile-time selection or - in case of
 NetworkManager - on its availability during runtime. If it is not available,
@@ -357,7 +357,7 @@ usually want to call this function from
 <hr>
 <div class="refsect2">
 <a name="gupnp-context-manager-get-port"></a><h3>gupnp_context_manager_get_port ()</h3>
-<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#guint"><span class="returnvalue">guint</span></a>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="returnvalue">guint</span></a>
 gupnp_context_manager_get_port (<em class="parameter"><code><a class="link" href="GUPnPContextManager.html" title="GUPnPContextManager"><span class="type">GUPnPContextManager</span></a> *manager</code></em>);</pre>
 <p>Get the network port associated with this context manager.</p>
 <div class="refsect3">
@@ -424,14 +424,14 @@ functions below.</p>
 <a name="GUPnPContextManager.property-details"></a><h2>Property Details</h2>
 <div class="refsect2">
 <a name="GUPnPContextManager--main-context"></a><h3>The <code class="literal">“main-context”</code> property</h3>
-<pre class="programlisting">  “main-context”             <a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a></pre>
+<pre class="programlisting">  “main-context”             <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a></pre>
 <p>GMainContext to pass to created GUPnPContext objects.</p>
 <p>Flags: Read / Write / Construct Only</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="GUPnPContextManager--port"></a><h3>The <code class="literal">“port”</code> property</h3>
-<pre class="programlisting">  “port”                     <a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a></pre>
+<pre class="programlisting">  “port”                     <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint"><span class="type">guint</span></a></pre>
 <p>Port the contexts listen on, or 0 if you don't care what
 port is used by <a class="link" href="GUPnPContext.html" title="GUPnPContext"><span class="type">GUPnPContext</span></a> objects created by this object.</p>
 <p>Flags: Read / Write / Construct Only</p>
@@ -452,7 +452,7 @@ port is used by <a class="link" href="GUPnPContext.html" title="GUPnPContext"><s
 <pre class="programlisting"><span class="returnvalue">void</span>
 user_function (<a class="link" href="GUPnPContextManager.html" title="GUPnPContextManager"><span class="type">GUPnPContextManager</span></a> *context_manager,
                <a class="link" href="GUPnPContext.html" title="GUPnPContext"><span class="type">GUPnPContext</span></a>        *context,
-               <a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>             user_data)</pre>
+               <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>             user_data)</pre>
 <p>Signals the availability of new <a class="link" href="GUPnPContext.html" title="GUPnPContext"><span class="type">GUPnPContext</span></a>.</p>
 <div class="refsect3">
 <a name="GUPnPContextManager-context-available.parameters"></a><h4>Parameters</h4>
@@ -481,7 +481,7 @@ user_function (<a class="link" href="GUPnPContextManager.html" title="GUPnPConte
 </tbody>
 </table></div>
 </div>
-<p>Flags: <a href="https://developer.gnome.org/gobject/unstable/gobject-Signals.html#G-SIGNAL-RUN-FIRST:CAPS">Run First</a></p>
+<p>Flags: <a href="/usr/share/gtk-doc/html/gobjectgobject-Signals.html#G-SIGNAL-RUN-FIRST:CAPS">Run First</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -489,7 +489,7 @@ user_function (<a class="link" href="GUPnPContextManager.html" title="GUPnPConte
 <pre class="programlisting"><span class="returnvalue">void</span>
 user_function (<a class="link" href="GUPnPContextManager.html" title="GUPnPContextManager"><span class="type">GUPnPContextManager</span></a> *context_manager,
                <a class="link" href="GUPnPContext.html" title="GUPnPContext"><span class="type">GUPnPContext</span></a>        *context,
-               <a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>             user_data)</pre>
+               <a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>             user_data)</pre>
 <p>Signals the unavailability of a <a class="link" href="GUPnPContext.html" title="GUPnPContext"><span class="type">GUPnPContext</span></a>.</p>
 <div class="refsect3">
 <a name="GUPnPContextManager-context-unavailable.parameters"></a><h4>Parameters</h4>
@@ -518,7 +518,7 @@ user_function (<a class="link" href="GUPnPContextManager.html" title="GUPnPConte
 </tbody>
 </table></div>
 </div>
-<p>Flags: <a href="https://developer.gnome.org/gobject/unstable/gobject-Signals.html#G-SIGNAL-RUN-FIRST:CAPS">Run First</a></p>
+<p>Flags: <a href="/usr/share/gtk-doc/html/gobjectgobject-Signals.html#G-SIGNAL-RUN-FIRST:CAPS">Run First</a></p>
 </div>
 </div>
 </div>

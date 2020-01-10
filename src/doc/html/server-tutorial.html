@@ -268,7 +268,7 @@ service = gupnp_device_info_get_service
       control point subscribes to the service (to announce the initial value),
       or whenever a client queries the value of a state variable (note that this
       is now deprecated behaviour for UPnP control points): the handler is
-      passed the variable name and a <a href="https://developer.gnome.org/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a> which should be set to the current
+      passed the variable name and a <a href="/usr/share/gtk-doc/html/gobjectgobject-Generic-values.html#GValue"><span class="type">GValue</span></a> which should be set to the current
       value of the variable.
     </p>
 <p>
@@ -321,7 +321,7 @@ g_signal_connect (service, "action-invoked::GetStatus", G_CALLBACK (get_status_c
 g_signal_connect (service, "action-invoked::SetTarget", G_CALLBACK (set_target_cb), NULL);</pre>
 <p>
       State variable query handlers are called with the name of the variable and
-      a <a href="https://developer.gnome.org/gobject/unstable/gobject-Generic-values.html#GValue"><span class="type">GValue</span></a>.  This value should be initialized with the relevant type and
+      a <a href="/usr/share/gtk-doc/html/gobjectgobject-Generic-values.html#GValue"><span class="type">GValue</span></a>.  This value should be initialized with the relevant type and
       then set to the current value.  Again signal detail can be used to connect
       handlers to specific state variable callbacks.
     </p>

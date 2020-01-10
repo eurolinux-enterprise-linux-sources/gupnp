@@ -1,6 +1,6 @@
 Name:          gupnp
-Version:       1.0.1
-Release:       1%{?dist}
+Version:       1.0.2
+Release:       5%{?dist}
 Summary:       A framework for creating UPnP devices & control points
 
 License:       LGPLv2+
@@ -13,7 +13,6 @@ BuildRequires: gobject-introspection-devel >= 1.36
 BuildRequires: libsoup-devel
 BuildRequires: libxml2-devel
 BuildRequires: libuuid-devel
-BuildRequires: NetworkManager-devel
 BuildRequires: vala
 
 Requires: dbus
@@ -76,6 +75,10 @@ make check %{?_smp_mflags} V=1
 %doc %{_datadir}/gtk-doc/html/%{name}
 
 %changelog
+* Mon Jun 04 2018 Richard Hughes <rhughes@redhat.com> - 1.0.2-5
++ Update to latest upstream version
+- Resolves: #1569980
+
 * Thu Mar 02 2017 Bastien Nocera <bnocera@redhat.com> - 1.0.1-1
 + gupnp-1.0.1-1
 - Rebase to 1.0.1
