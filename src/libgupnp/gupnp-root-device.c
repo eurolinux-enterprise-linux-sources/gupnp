@@ -272,7 +272,6 @@ gupnp_root_device_constructor (GType                  type,
         GUPnPRootDevice *device;
         GUPnPContext *context;
         const char *description_path, *description_dir, *udn;
-        SoupURI *uri;
         char *desc_path, *location, *usn, *relative_location;
         unsigned int i;
         GUPnPXMLDoc *description_doc;
@@ -421,11 +420,10 @@ gupnp_root_device_constructor (GType                  type,
         gupnp_context_host_path (context, device->priv->description_dir, "");
 
         /* Generate full location */
-        uri = _gupnp_context_get_server_uri (context);
-        soup_uri_set_path (uri, relative_location);
-        location = soup_uri_to_string (uri, FALSE);
-        soup_uri_free (uri);
-
+        location = g_strjoin (NULL,
+                              _gupnp_context_get_server_url (context),
+                              relative_location,
+                              NULL);
         g_free (relative_location);
 
         /* Save the URL base, if any */
@@ -483,8 +481,6 @@ gupnp_root_device_class_init (GUPnPRootDeviceClass *klass)
          * GUPnPRootDevice:description-doc:
          *
          * Device description document. Constructor property.
-         *
-         * Since: 0.13.0
          **/
         g_object_class_install_property
                 (object_class,
@@ -504,8 +500,6 @@ gupnp_root_device_class_init (GUPnPRootDeviceClass *klass)
          *
          * The path to device description document. This could either be an
          * absolute path or path relative to GUPnPRootDevice:description-dir.
-         *
-         * Since: 0.13.0
          **/
         g_object_class_install_property
                 (object_class,
@@ -712,8 +706,6 @@ gupnp_root_device_get_description_dir (GUPnPRootDevice *root_device)
  * Get the #GSSDPResourceGroup used by @root_device.
  *
  * Returns: (transfer none): The #GSSDPResourceGroup of @root_device.
- *
- * Since: 0.19.2
  **/
 GSSDPResourceGroup *
 gupnp_root_device_get_ssdp_resource_group (GUPnPRootDevice *root_device)

@@ -206,8 +206,7 @@ gupnp_resource_factory_create_device_proxy
  * @element: The #xmlNode ponting to the right service element
  * @location: The location of the service description file
  * @udn: The UDN of the device the service is contained in
- * @service_type: (allow-none): The service type, or %NULL to use service
- * type from @element
+ * @service_type: The service type
  * @url_base: The URL base for this service, or %NULL if none
  *
  * Create a #GUPnPServiceProxy for the service with element @element, as
@@ -226,7 +225,6 @@ gupnp_resource_factory_create_service_proxy
                                  const char           *location,
                                  const SoupURI        *url_base)
 {
-        char              *type_from_xml = NULL;
         GUPnPServiceProxy *proxy;
         GType              proxy_type = GUPNP_TYPE_SERVICE_PROXY;
 
@@ -236,13 +234,6 @@ gupnp_resource_factory_create_service_proxy
         g_return_val_if_fail (element != NULL, NULL);
         g_return_val_if_fail (location != NULL, NULL);
         g_return_val_if_fail (url_base != NULL, NULL);
-
-        if (!service_type) {
-                type_from_xml =
-                    xml_util_get_child_element_content_glib (element,
-                                                             "serviceType");
-                service_type = type_from_xml;
-        }
 
         if (service_type) {
                 gpointer value;
@@ -262,8 +253,6 @@ gupnp_resource_factory_create_service_proxy
                               "document", doc,
                               "element", element,
                               NULL);
-
-        g_free (type_from_xml);
 
         return proxy;
 }

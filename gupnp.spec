@@ -1,5 +1,5 @@
 Name:          gupnp
-Version:       0.20.13
+Version:       0.20.3
 Release:       1%{?dist}
 Summary:       A framework for creating UPnP devices & control points
 
@@ -8,14 +8,13 @@ License:       LGPLv2+
 URL:           http://www.gupnp.org/
 Source0:       http://download.gnome.org/sources/%{name}/0.20/%{name}-%{version}.tar.xz
 
-BuildRequires: gssdp-devel >= 0.14.0
+BuildRequires: gssdp-devel >= 0.13.0
 BuildRequires: gtk-doc
 BuildRequires: gobject-introspection-devel >= 1.36
 BuildRequires: libsoup-devel
 BuildRequires: libxml2-devel
 BuildRequires: libuuid-devel
 BuildRequires: NetworkManager-devel
-BuildRequires: vala-tools
 
 Requires: dbus
 
@@ -76,22 +75,11 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 %{_libdir}/libgupnp-1.0.so
 %{_includedir}/gupnp-1.0
 %{_datadir}/gir-1.0/GUPnP-1.0.gir
-%{_datadir}/vala/vapi/%{name}*
 
 %files docs
 %doc %{_datadir}/gtk-doc/html/%{name}
 
 %changelog
-* Mon Jun 01 2015 Debarshi Ray <rishi@fedoraproject.org> - 0.20.13-1
-- Update to 0.20.13 and re-enable vala bindings
-Resolves: #1225451
-
-* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 0.20.3-3
-- Mass rebuild 2014-01-24
-
-* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 0.20.3-2
-- Mass rebuild 2013-12-27
-
 * Thu May 30 2013 Peter Robinson <pbrobinson@fedoraproject.org> 0.20.3-1
 - 0.20.3 release
 - http://ftp.gnome.org/pub/GNOME/sources/gupnp/0.20/gupnp-0.20.3.news

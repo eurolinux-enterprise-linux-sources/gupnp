@@ -7,12 +7,8 @@ CONTEXT_MANAGER_CFLAGS =
 CONTEXT_MANAGER_LIBS = -lws2_32 -liphlpapi
 WIN32_LDFLAGS = -no-undefined
 else
-if HAVE_IFADDRS_H
 CONTEXT_MANAGER_IMPL = gupnp-unix-context-manager.c \
 					   gupnp-unix-context-manager.h
-else
-CONTEXT_MANAGER_IMPL =
-endif
 if USE_NETWORK_MANAGER
 CONTEXT_MANAGER_IMPL += gupnp-network-manager.c  \
 		        gupnp-network-manager.h
@@ -48,8 +44,7 @@ libgupnpincdir = $(includedir)/gupnp-1.0/libgupnp
 
 lib_LTLIBRARIES = libgupnp-1.0.la
 
-libgupnpinc_HEADERS = gupnp-acl.h			\
-		      gupnp-context.h			\
+libgupnpinc_HEADERS = gupnp-context.h			\
 		      gupnp-context-manager.h		\
 		      gupnp-control-point.h		\
 		      gupnp-device.h			\
@@ -63,12 +58,10 @@ libgupnpinc_HEADERS = gupnp-acl.h			\
 		      gupnp-service-proxy.h		\
 		      gupnp-service-introspection.h	\
 		      gupnp-xml-doc.h	                \
-		      gupnp-white-list.h                \
 		      gupnp-types.h			\
 		      gupnp.h
 
 introspection_sources = $(libgupnpinc_HEADERS) \
-			gupnp-acl.c			\
 			gupnp-context.c			\
 			gupnp-context-manager.c		\
 			gupnp-control-point.c		\
@@ -83,7 +76,6 @@ introspection_sources = $(libgupnpinc_HEADERS) \
 			gupnp-service-proxy.c		\
 			gupnp-service-introspection.c	\
 			gupnp-xml-doc.c			\
-			gupnp-white-list.c		\
 			gupnp-types.c
 
 
@@ -108,7 +100,6 @@ libgupnp_1_0_la_SOURCES = $(introspection_sources)		\
 			  gupnp-error-private.h			\
 			  gupnp-resource-factory-private.h	\
 			  gupnp-service-introspection-private.h	\
-                          gupnp-acl-private.h                   \
 			  gupnp-types-private.h			\
 			  gvalue-util.c				\
 			  gvalue-util.h				\

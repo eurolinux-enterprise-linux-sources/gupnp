@@ -28,8 +28,6 @@
  *
  * GObject wrapper for xmlDoc, so that we can use refcounting and weak
  * references.
- *
- * Since: 0.13.0
  */
 
 #include <string.h>
@@ -75,8 +73,6 @@ gupnp_xml_doc_class_init (GUPnPXMLDocClass *klass)
  * Create a new #GUPnPXMLDoc for @xml_doc.
  *
  * Return value: A new #GUPnPXMLDoc, or %NULL on an error
- *
- * Since: 0.13.0
  **/
 GUPnPXMLDoc *
 gupnp_xml_doc_new (xmlDoc *xml_doc)
@@ -100,8 +96,6 @@ gupnp_xml_doc_new (xmlDoc *xml_doc)
  * Create a new #GUPnPXMLDoc for the XML document at @path.
  *
  * Return value: A new #GUPnPXMLDoc, or %NULL on an error
- *
- * Since: 0.13.0
  **/
 GUPnPXMLDoc *
 gupnp_xml_doc_new_from_path (const char *path,
